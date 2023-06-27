@@ -1,22 +1,13 @@
 const std = @import("std");
 
 pub fn main() !void {
-    const wasmfile = try std.fs.openFileAbsolute("/Users/cdstowell/d/zwasm/m.wasm", .{ .mode = .read_only });
+    const module_path = "/Users/cdstowell/d/zwasm/m.wasm";
+    const wasmfile = std.fs.openFileAbsolute(module_path, .{ .mode = .read_only }) catch |err| {
+        std.debug.print("Could not open module path {s}: {!}", .{ module_path, err });
+        return;
+    };
     const stats = try wasmfile.stat();
-    std.debug.print("The module file is {d} bytes", .{stats.size});
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
-
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
-
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-    try bw.flush(); // don't forget to flush!
+    std.debug.print("The module file is {d} bytes\n", .{stats.size});
 }
 
 test "simple test" {

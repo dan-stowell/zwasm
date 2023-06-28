@@ -11,18 +11,30 @@ pub fn main() !void {
     const stats = try wasmfile.stat();
     std.debug.print("The module file is {d} bytes\n", .{stats.size});
 
-    var buffer: [4]u8 = undefined;
+    var buffer: [8]u8 = undefined;
     const bytes_read = wasmfile.read(&buffer) catch |err| {
         std.debug.print("Could not read file: {!}", .{err});
         return;
     };
     std.debug.print("Read {d} bytes\n", .{bytes_read});
-    if ((0x0061 == buffer[0]) and (0x736d == buffer[1])) {
+
+    const expected_magic_number = [4]u8{ 0x00, 0x61, 0x73, 0x6d };
+    var matches: bool = true;
+    for (buffer[0..3]) |value, index| {
+        if (value == expected_magic_number[index]) {
+            continue;
+        } else {
+            matches = false;
+            break;
+        }
+    }
+    if (matches) {
         std.debug.print("Correct magic number!\n", .{});
     } else {
         std.debug.print("Incorrect magic number!\n", .{});
     }
-    const version = buffer[2];
+
+    const version = std.fmt.fmtSliceHexLower(buffer[4..8]);
     std.debug.print("Binary version {x}\n", .{version});
 }
 

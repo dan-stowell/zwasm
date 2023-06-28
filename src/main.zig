@@ -1,6 +1,16 @@
 const std = @import("std");
 
 pub fn main() !void {
+    var args = std.process.argsWithAllocator(std.heap.page_allocator) catch |err| {
+        std.debug.print("Could not create args iterator: {!}\n", .{err});
+        return;
+    };
+    defer args.deinit();
+
+    while (args.next()) |arg| {
+        std.debug.print("arg: {s}\n", .{arg});
+    }
+
     const module_path = "/Users/cdstowell/d/zwasm/m.wasm";
     const wasmfile = std.fs.openFileAbsolute(module_path, .{ .mode = .read_only }) catch |err| {
         std.debug.print("Could not open module path {s}: {!}", .{ module_path, err });
